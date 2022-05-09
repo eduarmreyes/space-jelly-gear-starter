@@ -1,5 +1,5 @@
 {
-  "name": "demo-space-jelly-gear",
+  "name": "eduarmreyes-demo-space-jelly-gear",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -8,14 +8,17 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "12.0.10",
-    "react": "17.0.2",
-    "react-dom": "17.0.2",
-    "react-icons": "^4.3.1",
-    "sass": "^1.49.7"
+    "@apollo/client": "^3",
+    "graphql": "^16",
+    "next": "^12",
+    "react": "^17",
+    "react-dom": "^17",
+    "react-icons": "^4",
+    "sass": "^1"
   },
   "devDependencies": {
-    "eslint": "8.9.0",
-    "eslint-config-next": "12.0.10"
+    "eslint": "^8",
+    "eslint-config-next": "^12",
+    "typescript": "^4"
   }
 }
