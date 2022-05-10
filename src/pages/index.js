@@ -1,6 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import Image from "next/image";
+import { ApolloClient, InMemoryCache, gql } from "@apollo/client";
 
 import Layout from "@components/Layout";
 import Container from "@components/Container";
@@ -10,7 +11,9 @@ import products from "@data/products";
 
 import styles from "@styles/Page.module.scss";
 
-export default function Home() {
+export default function Home({ page, products }) {
+  const { heroTitle, heroText, heroLink, heroBackground } = page;
+
   return (
     <Layout>
       <Head>
@@ -22,25 +25,21 @@ export default function Home() {
         <h1 className="sr-only">Space Jelly Gear</h1>
 
         <div className={styles.hero}>
-          <Link href="#">
+          <Link href={heroLink}>
             <a>
               <div className={styles.heroContent}>
-                <h2>Prepare for liftoff.</h2>
-                <p>Apparel that&apos;s out of this world!</p>
+                <h2>{heroTitle}</h2>
+                <p>{heroText}</p>
               </div>
               <Image
                 className={styles.heroImage}
-                src="/images/space-jelly-gear-banner.jpg"
+                src={heroBackground.url}
                 alt="Two people showing off the shirt and hat apparel."
                 layout="responsive"
-                height={272}
-                width={800}
+                height={heroBackground.height}
+                width={heroBackground.width}
+                priority={true}
               />
-              {/* <img
-                className={styles.heroImage}
-                src="/images/space-jelly-gear-banner.jpg"
-                alt=""
-              /> */}
             </a>
           </Link>
         </div>
@@ -48,21 +47,28 @@ export default function Home() {
         <h2 className={styles.heading}>Featured Gear</h2>
 
         <ul className={styles.products}>
-          {products.slice(0, 4).map((product) => {
+          {products.map((product) => {
+            const userLanguage = navigator.language || navigator.userLanguage;
+
+            const productPrice = new Intl.NumberFormat(userLanguage, {
+              style: "currency",
+              currency: "usd",
+            }).format(product.price);
+
             return (
-              <li key={product.id}>
+              <li key={product.slug}>
                 <Link href="#">
                   <a>
                     <div className={styles.productImage}>
                       <Image
-                        width={500}
-                        height={500}
-                        src={product.image}
+                        width={product.image.width}
+                        height={product.image.height}
+                        src={product.image.url}
                         alt={`${product.name} showing on a product card.`}
                       />
                     </div>
                     <h3 className={styles.productTitle}>{product.name}</h3>
-                    <p className={styles.productPrice}>${product.price}</p>
+                    <p className={styles.productPrice}>{productPrice}</p>
                   </a>
                 </Link>
                 <p>
@@ -75,4 +81,60 @@ export default function Home() {
       </Container>
     </Layout>
   );
+}
+
+export async function getStaticProps() {
+  const client = new ApolloClient({
+    uri: process.env.NEXT_PUBLIC_API_ENDPOINT,
+    cache: new InMemoryCache(),
+  });
+
+  let data;
+
+  await client
+    .query({
+      query: gql`
+        query homePage {
+          page(where: { slug: "home" }) {
+            id
+            heroLink
+            heroText
+            heroTitle
+            heroBackground {
+              fileName
+              size
+              stage
+              url
+              width
+              height
+            }
+          }
+          products(first: 4) {
+            name
+            price
+            slug
+            image {
+              height
+              url
+              width
+              size
+            }
+          }
+        }
+      `,
+    })
+    .then((result) => {
+      data = result.data;
+    })
+    .catch((error) => {
+      throw error;
+    });
+
+  const { page, products } = data;
+
+  // console.log("Fetched products:", JSON.stringify(products, null, 2));
+
+  return {
+    props: { page, products },
+  };
 }
