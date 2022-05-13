@@ -48,9 +48,7 @@ export default function Home({ page, products }) {
 
         <ul className={styles.products}>
           {products.map((product) => {
-            const userLanguage = navigator.language || navigator.userLanguage;
-
-            const productPrice = new Intl.NumberFormat(userLanguage, {
+            const productPrice = new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "usd",
             }).format(product.price);
@@ -100,25 +98,13 @@ export async function getStaticProps() {
             heroLink
             heroText
             heroTitle
-            heroBackground {
-              fileName
-              size
-              stage
-              url
-              width
-              height
-            }
+            heroBackground
           }
           products(first: 4) {
             name
             price
             slug
-            image {
-              height
-              url
-              width
-              size
-            }
+            image
           }
         }
       `,
